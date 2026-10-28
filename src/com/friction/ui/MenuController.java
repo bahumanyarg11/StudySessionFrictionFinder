@@ -83,9 +83,9 @@ public class MenuController {
         StudySession session = new StudySession(date);
         do {
             System.out.println();
-            String name = input.readText("Task name: ");
-            String subject = input.readText("Subject: ");
-            String type = input.readText("Task type: ");
+            String name = input.readText("Task name: ", StudyTask.MAX_NAME_LENGTH);
+            String subject = input.readText("Subject: ", StudyTask.MAX_SUBJECT_LENGTH);
+            String type = input.readText("Task type: ", StudyTask.MAX_TYPE_LENGTH);
             int minutes = input.readInt("Estimated duration (minutes): ", 1, 1440);
             session.addTask(new StudyTask(name, subject, type, minutes, input.readPriority("Priority (High/Medium/Low): ")));
         } while (input.readYesNo("\nAdd another task? (Y/N): "));
@@ -144,7 +144,7 @@ public class MenuController {
             System.out.println("(Enter the TOTAL time spent so far; currently " + task.getActualMinutes() + " min)");
             actual = input.readInt("Actual time spent (minutes): ", 0, 1440);
         }
-        String note = input.readOptional("Optional note: ");
+        String note = input.readOptional("Optional note: ", StudyTask.MAX_NOTE_LENGTH);
 
         planService.updateTask(task, status, actual, note);
         System.out.println("\nTask updated successfully.");

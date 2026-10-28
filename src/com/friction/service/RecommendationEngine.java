@@ -40,12 +40,13 @@ public class RecommendationEngine {
             ratios.put(e.getKey(), analytics.averageRatio(e.getValue()));
         }
 
-        // 2. Latest unfinished version of each task name (later completion removes it)
+        // 2. Latest unfinished version of each task (later completion removes it).
+        // Name alone is not enough: two different subjects can use the same task name.
         Map<String, StudyTask> unfinished = new LinkedHashMap<>();
         Map<String, LocalDate> lastSeen = new HashMap<>();
         for (StudySession s : historyService.getSessions(targetDate.minusDays(LOOKBACK_DAYS), dayBefore)) {
             for (StudyTask t : s.getTasks()) {
-                String key = t.getName().toLowerCase();
+                String key = taskKey(t);
                 if (t.isUnfinished()) {
                     unfinished.put(key, t);
                     lastSeen.put(key, s.getDate());
@@ -92,5 +93,10 @@ public class RecommendationEngine {
 
     private int roundTo5(double minutes) {
         return (int) (Math.round(minutes / 5.0) * 5);
+    }
+
+    /** Stable identity of a task across days, independent of letter case. */
+    private static String taskKey(StudyTask task) {
+        return (task.getName() + "|" + task.getSubject() + "|" + task.getType()).toLowerCase(Locale.ROOT);
     }
 }
