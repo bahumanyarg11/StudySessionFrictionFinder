@@ -16,7 +16,10 @@ import java.util.Map;
 public class StudySessionDAO implements StudySessionRepository {
 
     private static final String SELECT_BETWEEN =
-            "SELECT s.session_id, s.session_date, t.* FROM study_sessions s " +
+            "SELECT s.session_id, s.session_date, " +
+            "t.task_id, t.task_name, t.subject, t.task_type, t.planned_minutes, " +
+            "t.actual_minutes, t.priority, t.status, t.note " +
+            "FROM study_sessions s " +
             "LEFT JOIN study_tasks t ON t.session_id = s.session_id " +
             "WHERE s.session_date BETWEEN ? AND ? ORDER BY s.session_date, t.task_id";
 
@@ -35,7 +38,7 @@ public class StudySessionDAO implements StudySessionRepository {
                     keys.next();
                     session.setId(keys.getInt(1));
                 }
-                try (PreparedStatement taskPs = con.prepareStatement(insertTask)) {
+                try (PreparedStatement taskPs = con.prepareStatement(insertTask, Statement.RETURN_GENERATED_KEYS)) {
                     for (StudyTask t : session.getTasks()) {
                         taskPs.setInt(1, session.getId());
                         taskPs.setString(2, t.getName());
@@ -46,9 +49,14 @@ public class StudySessionDAO implements StudySessionRepository {
                         taskPs.setString(7, t.getPriority().name());
                         taskPs.setString(8, t.getStatus().name());
                         taskPs.setString(9, t.getNote());
-                        taskPs.addBatch();
+                        taskPs.executeUpdate();
+                        try (ResultSet keys = taskPs.getGeneratedKeys()) {
+                            if (keys.next()) {
+                                t.setId(keys.getInt(1));
+                            }
+                        }
+                        t.setSessionId(session.getId());
                     }
-                    taskPs.executeBatch();
                 }
                 con.commit();
                 return session.getId();

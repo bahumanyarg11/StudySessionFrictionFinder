@@ -19,9 +19,27 @@ public class InputHelper {
         }
     }
 
+    /** Like readText, but re-prompts when the value is longer than the database column allows. */
+    public String readText(String prompt, int maxLength) {
+        while (true) {
+            String line = readText(prompt);
+            if (line.length() <= maxLength) return line;
+            System.out.println("Please use at most " + maxLength + " characters.");
+        }
+    }
+
     public String readOptional(String prompt) {
         System.out.print(prompt);
         return scanner.nextLine().trim();
+    }
+
+    /** Like readOptional, but re-prompts when the value is longer than the database column allows. */
+    public String readOptional(String prompt, int maxLength) {
+        while (true) {
+            String line = readOptional(prompt);
+            if (line.length() <= maxLength) return line;
+            System.out.println("Please use at most " + maxLength + " characters (or leave it blank).");
+        }
     }
 
     public int readInt(String prompt, int min, int max) {

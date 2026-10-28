@@ -2,6 +2,12 @@ package com.friction.model;
 
 /** One to-do item inside a daily study plan. */
 public class StudyTask {
+    // Limits match the column sizes in database/schema.sql
+    public static final int MAX_NAME_LENGTH = 100;
+    public static final int MAX_SUBJECT_LENGTH = 50;
+    public static final int MAX_TYPE_LENGTH = 50;
+    public static final int MAX_NOTE_LENGTH = 255;
+
     private int id;
     private int sessionId;
     private String name;
@@ -44,19 +50,31 @@ public class StudyTask {
     public String getName() { return name; }
     public void setName(String name) {
         if (name == null || name.isBlank()) throw new IllegalArgumentException("Task name cannot be empty.");
-        this.name = name.trim();
+        String value = name.trim();
+        if (value.length() > MAX_NAME_LENGTH) {
+            throw new IllegalArgumentException("Task name must be at most " + MAX_NAME_LENGTH + " characters.");
+        }
+        this.name = value;
     }
 
     public String getSubject() { return subject; }
     public void setSubject(String subject) {
         if (subject == null || subject.isBlank()) throw new IllegalArgumentException("Subject cannot be empty.");
-        this.subject = subject.trim();
+        String value = subject.trim();
+        if (value.length() > MAX_SUBJECT_LENGTH) {
+            throw new IllegalArgumentException("Subject must be at most " + MAX_SUBJECT_LENGTH + " characters.");
+        }
+        this.subject = value;
     }
 
     public String getType() { return type; }
     public void setType(String type) {
         if (type == null || type.isBlank()) throw new IllegalArgumentException("Task type cannot be empty.");
-        this.type = type.trim();
+        String value = type.trim();
+        if (value.length() > MAX_TYPE_LENGTH) {
+            throw new IllegalArgumentException("Task type must be at most " + MAX_TYPE_LENGTH + " characters.");
+        }
+        this.type = value;
     }
 
     public int getPlannedMinutes() { return plannedMinutes; }
@@ -79,5 +97,15 @@ public class StudyTask {
     public void setStatus(TaskStatus status) { this.status = status; }
 
     public String getNote() { return note; }
-    public void setNote(String note) { this.note = (note == null || note.isBlank()) ? null : note.trim(); }
+    public void setNote(String note) {
+        if (note == null || note.isBlank()) {
+            this.note = null;
+            return;
+        }
+        String value = note.trim();
+        if (value.length() > MAX_NOTE_LENGTH) {
+            throw new IllegalArgumentException("Note must be at most " + MAX_NOTE_LENGTH + " characters.");
+        }
+        this.note = value;
+    }
 }
